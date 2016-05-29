@@ -851,6 +851,8 @@ typedef int socklen_t;
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
+#include <openssl/engine.h>
+#include <openssl/conf.h>
 #else
 /* SSL loaded dynamically from DLL.
  * I put the prototypes here to be independent from OpenSSL source
@@ -5906,7 +5908,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		return 0;
 	}
 
-#ifndef NO_SSL_DL
+#if !defined(NO_SSL_DL)
 	if (use_ssl && (SSLv23_client_method == NULL)) {
 		mg_snprintf(NULL,
 		            NULL, /* No truncation check for ebuf */
@@ -5916,6 +5918,8 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		            "SSL is not initialized");
 		return 0;
 	}
+#else
+    (void)use_ssl;
 #endif
 
 	if (mg_inet_pton(AF_INET, host, &sa->sin, sizeof(sa->sin))) {
