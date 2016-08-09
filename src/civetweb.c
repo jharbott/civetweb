@@ -4890,14 +4890,17 @@ mg_get_cookie(const char *cookie_header,
   if (var_name == NULL || (s = cookie_header) == NULL) {
     return -1;
   }
-
+#if 1
+  /* that is only for travis error: mg_strcasestr defined but not used */
+  IGNORE_UNUSED_RESULT( mg_strcasestr( "", ""));
+#endif
   name_len = strlen(var_name);
   end = s + strlen(s);
   /* ignore starting spaces */
   while (*s == ' ') s++;
   /* first search '=' */
   while ((p = strchr(s, '=')) != NULL) {
-    len = (p - s);
+    len = (size_t)(p - s);
     if (len == name_len) {
       if (mg_strncasecmp(s, var_name, name_len) == 0) {
         /* var_name found */
@@ -4914,7 +4917,7 @@ mg_get_cookie(const char *cookie_header,
           s++;
           p--;
         }
-        len = (p - s);
+        len = (size_t)(p - s);
         if (len < dst_size) {
           mg_strlcpy(dst, s, len + 1);
           return (int)len;
