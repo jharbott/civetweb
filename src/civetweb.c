@@ -2437,7 +2437,8 @@ skip_quoted(char **buf,
 		*buf = end_word;
 	} else {
 		end_whitespace =
-		    end_word + ((unsigned int)strspn(end_word + 1, whitespace) + 1u);
+		    end_word + ((unsigned int)strspn(&end_word[1], whitespace)
+		                + (unsigned int)1);
 
 		for (p = end_word; p < end_whitespace; p++) {
 			*p = '\0';
@@ -9269,8 +9270,8 @@ read_websocket(struct mg_connection *conn,
 	 * the
 	 * websocket_data callback.  This is either mem on the stack, or a
 	 * dynamically allocated buffer if it is too large. */
-	char mem[4096];
-	char *data = mem;
+	unsigned char mem[4096];
+	unsigned char *data = mem;
 	unsigned char mop; /* mask flag and opcode */
 	double timeout = -1.0;
 
@@ -9422,7 +9423,7 @@ mg_websocket_write_exec(struct mg_connection *conn,
 
 	int retval = -1;
 
-	header[0] = 0x80 + (opcode & 0xF);
+	header[0] = 0x80 + (((unsigned char)opcode) & 0xF);
 
 	/* Frame format: http://tools.ietf.org/html/rfc6455#section-5.2 */
 	if (dataLen < 126) {
@@ -9437,8 +9438,8 @@ mg_websocket_write_exec(struct mg_connection *conn,
 		headerLen = 4;
 	} else {
 		/* 64-bit length field */
-		uint32_t len1 = htonl((uint64_t)dataLen >> 32);
-		uint32_t len2 = htonl(dataLen & 0xFFFFFFFF);
+		len1 = htonl((uint32_t)((uint64_t)dataLen >> 32));
+		uint32_t len2 = htonl((uint32_t)(dataLen & 0xFFFFFFFFu));
 		header[1] = 127;
 		memcpy(header + 2, &len1, 4);
 		memcpy(header + 6, &len2, 4);
