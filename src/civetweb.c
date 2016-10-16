@@ -2427,7 +2427,8 @@ skip_quoted(char **buf,
 	if (*end_word == '\0') {
 		*buf = end_word;
 	} else {
-		end_whitespace = end_word + 1 + strspn(end_word + 1, whitespace);
+		end_whitespace =
+		    end_word + 1u + (unsigned int)strspn(end_word + 1, whitespace);
 
 		for (p = end_word; p < end_whitespace; p++) {
 			*p = '\0';
