@@ -4363,6 +4363,9 @@ pull(FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout)
 			pfd[0].fd = conn->client.sock;
 			pfd[0].events = POLLIN;
 			pollres = poll(pfd, 1, (int)(timeout * 1000.0));
+			if (conn->ctx->stop_flag) {
+				return -1;
+			}
 			if (pollres > 0) {
 				nread = SSL_read(conn->ssl, buf, len);
 				if (nread <= 0) {
@@ -4397,6 +4400,9 @@ pull(FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout)
 			pfd[0].fd = conn->client.sock;
 			pfd[0].events = POLLIN;
 			pollres = poll(pfd, 1, (int)(timeout * 1000.0));
+			if (conn->ctx->stop_flag) {
+				return -1;
+			}
 			if (pollres > 0) {
 				nread = (int)recv(conn->client.sock, buf, (len_t)len, 0);
 				err = (nread < 0) ? ERRNO : 0;
@@ -12280,7 +12286,7 @@ mg_close_connection(struct mg_connection *conn)
 		conn->ctx->stop_flag = 1;
 
 		/* we need to get the client thread out of the select/recv call here */
-		mg_websocket_write(conn, WEBSOCKET_OPCODE_CONNECTION_CLOSE, "", 0);
+		// mg_websocket_write(conn, WEBSOCKET_OPCODE_CONNECTION_CLOSE, "", 0);
 
 		/* join worker thread */
 		for (i = 0; i < client_ctx->cfg_worker_threads; i++) {
