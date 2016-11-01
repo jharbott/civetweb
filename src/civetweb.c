@@ -4205,7 +4205,7 @@ mg_poll(struct pollfd *pfd,
 			return -2;
 		}
 
-		if (milliseconds < ms_now) {
+		if ((milliseconds >= 0) && (milliseconds < ms_now)) {
 			ms_now = milliseconds;
 		}
 
@@ -4217,7 +4217,9 @@ mg_poll(struct pollfd *pfd,
 		}
 
 		/* Poll returned timeout (0). */
-		milliseconds -= ms_now;
+        if (milliseconds >= 0) {
+		    milliseconds -= ms_now;
+        }
 
 	} while (milliseconds > 0);
 
@@ -4487,6 +4489,10 @@ pull(FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout)
 			} else if (err == WSAETIMEDOUT) {
 				/* TODO: check if this is still required */
 				/* timeout is handled by the while loop  */
+                return 0;
+            } else if (err == WSAECONNABORTED) {
+                /* See https://www.chilkatsoft.com/p/p_299.asp */
+                return -1;
 			} else {
 				DEBUG_TRACE("recv() failed, error %d", err);
 				return -1;
