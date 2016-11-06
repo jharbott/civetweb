@@ -4740,7 +4740,7 @@ mg_read(struct mg_connection *conn, void *buf, size_t len)
 						}
 						break;
 					}
-					if (!isalnum(lenbuf[i])) {
+					if (!isxdigit(lenbuf[i])) {
 						/* illegal character for chunk length */
 						return -1;
 					}
