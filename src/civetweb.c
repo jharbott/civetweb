@@ -1987,8 +1987,8 @@ mg_fopen(const struct mg_connection *conn,
 		* some fields like size and modification date with values */
 		found = mg_stat(conn, path, &(filep->stat));
 
-		/* TODO: if found=false, only call fopen if the file should
-		 * be created. If it should only be read, fail early. */
+/* TODO: if found=false, only call fopen if the file should
+ * be created. If it should only be read, fail early. */
 
 #ifdef _WIN32
 		{
@@ -2010,7 +2010,7 @@ mg_fopen(const struct mg_connection *conn,
 		}
 
 		/* file is on disk */
-		return (filep->access.fp != NULL);		
+		return (filep->access.fp != NULL);
 
 	} else {
 		if (open_file_in_memory(conn, path, filep)) {
@@ -9815,7 +9815,8 @@ handle_websocket_request(struct mg_connection *conn,
 		/* Step 2.1 check and select subprotocol */
 		const char *protocol = mg_get_header(conn, "Sec-WebSocket-Protocol");
 		if (protocol && subprotocols) {
-			int len, idx;
+			int idx;
+			unsigned long len;
 			const char *sep, *curSubProtocol,
 			    *acceptedWebSocketSubprotocol = NULL;
 
@@ -9824,15 +9825,15 @@ handle_websocket_request(struct mg_connection *conn,
 			do {
 				sep = strchr(protocol, ',');
 				curSubProtocol = protocol;
-				len = sep ? (int)(sep - protocol) : strlen(protocol);
+				len = sep ? (unsigned long)(sep - protocol) : strlen(protocol);
 				protocol = sep ? sep + 1 : NULL;
 
 
 				for (idx = 0; idx < subprotocols->nb_subprotocols; idx++) {
-					if (strlen(subprotocols->subprotocols[idx]) == len
-					    && strncmp(curSubProtocol,
-					               subprotocols->subprotocols[idx],
-					               len) == 0) {
+					if ((strlen(subprotocols->subprotocols[idx]) == len)
+					    && (strncmp(curSubProtocol,
+					                subprotocols->subprotocols[idx],
+					                len) == 0)) {
 						acceptedWebSocketSubprotocol =
 						    subprotocols->subprotocols[idx];
 						break;
