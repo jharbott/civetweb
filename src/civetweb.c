@@ -9432,7 +9432,9 @@ send_websocket_handshake(struct mg_connection *conn, const char *websock_key)
 	          "Sec-WebSocket-Accept: %s\r\n",
 	          b64_sha);
 	if (conn->request_info.acceptedSubprotocol) {
-		mg_printf(conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", conn->request_info.acceptedSubprotocol);
+		mg_printf(conn,
+		          "Sec-WebSocket-Protocol: %s\r\n\r\n",
+		          conn->request_info.acceptedSubprotocol);
 	} else {
 		mg_printf(conn, "%s", "\r\n");
 	}
@@ -9749,7 +9751,7 @@ static void
 handle_websocket_request(struct mg_connection *conn,
                          const char *path,
                          int is_callback_resource,
-						 struct mg_websocket_subprotocols * subprotocols,
+                         struct mg_websocket_subprotocols *subprotocols,
                          mg_websocket_connect_handler ws_connect_handler,
                          mg_websocket_ready_handler ws_ready_handler,
                          mg_websocket_data_handler ws_data_handler,
@@ -9809,7 +9811,7 @@ handle_websocket_request(struct mg_connection *conn,
 	if (is_callback_resource) {
 		/* Step 2.1 check and select subprotocol */
 		const char *protocol = mg_get_header(conn, "Sec-WebSocket-Protocol");
-		if(protocol && subprotocols) {
+		if (protocol && subprotocols) {
 			int len, idx;
 			const char *sep, *curSubProtocol, *acceptedSubProtocol = NULL;
 
@@ -9818,18 +9820,20 @@ handle_websocket_request(struct mg_connection *conn,
 			do {
 				sep = strchr(protocol, ',');
 				curSubProtocol = protocol;
-				len = sep ? (int) (sep - protocol) : strlen(protocol);
+				len = sep ? (int)(sep - protocol) : strlen(protocol);
 				protocol = sep ? sep + 1 : NULL;
 
 
-				for(idx = 0; idx < subprotocols->nb_subprotocols; idx++) {
-					if(strlen(subprotocols->subprotocols[idx])==len
-							&& strncmp(curSubProtocol, subprotocols->subprotocols[idx], len)==0) {
+				for (idx = 0; idx < subprotocols->nb_subprotocols; idx++) {
+					if (strlen(subprotocols->subprotocols[idx]) == len
+					    && strncmp(curSubProtocol,
+					               subprotocols->subprotocols[idx],
+					               len) == 0) {
 						acceptedSubProtocol = subprotocols->subprotocols[idx];
 						break;
 					}
 				}
-			} while(sep && !acceptedSubProtocol);
+			} while (sep && !acceptedSubProtocol);
 
 			conn->request_info.acceptedSubprotocol = acceptedSubProtocol;
 		} else if (protocol) {
@@ -9845,10 +9849,12 @@ handle_websocket_request(struct mg_connection *conn,
 			} else {
 				/* Multiple protocols -> accept the last one. */
 				/* This is just a quick fix if the client offers multiple
-				 * protocols. The handler should have a list of accepted protocols on his own
-				 * and use it to select one protocol among those the client has offered.
+				 * protocols. The handler should have a list of accepted
+				 * protocols on his own
+				 * and use it to select one protocol among those the client has
+				 * offered.
 				 */
-				conn->request_info.acceptedSubprotocol = (sep+1);
+				conn->request_info.acceptedSubprotocol = (sep + 1);
 			}
 		}
 
@@ -10213,7 +10219,7 @@ mg_set_handler_type(struct mg_context *ctx,
                     int handler_type,
                     int is_delete_request,
                     mg_request_handler handler,
-					struct mg_websocket_subprotocols *subprotocols,
+                    struct mg_websocket_subprotocols *subprotocols,
                     mg_websocket_connect_handler connect_handler,
                     mg_websocket_ready_handler ready_handler,
                     mg_websocket_data_handler data_handler,
@@ -10369,7 +10375,7 @@ mg_set_request_handler(struct mg_context *ctx,
 	                    REQUEST_HANDLER,
 	                    handler == NULL,
 	                    handler,
-						NULL,
+	                    NULL,
 	                    NULL,
 	                    NULL,
 	                    NULL,
@@ -10382,32 +10388,33 @@ mg_set_request_handler(struct mg_context *ctx,
 void
 mg_set_websocket_handler(struct mg_context *ctx,
                          const char *uri,
-						 mg_websocket_connect_handler connect_handler,
+                         mg_websocket_connect_handler connect_handler,
                          mg_websocket_ready_handler ready_handler,
                          mg_websocket_data_handler data_handler,
                          mg_websocket_close_handler close_handler,
                          void *cbdata)
 {
 	mg_set_websocket_handler_with_subprotocols(ctx,
-			uri,
-			NULL,
-			connect_handler,
-			ready_handler,
-			data_handler,
-			close_handler,
-			cbdata);
+	                                           uri,
+	                                           NULL,
+	                                           connect_handler,
+	                                           ready_handler,
+	                                           data_handler,
+	                                           close_handler,
+	                                           cbdata);
 }
 
 
 void
-mg_set_websocket_handler_with_subprotocols(struct mg_context *ctx,
-                         const char *uri,
-						 struct mg_websocket_subprotocols* subprotocols,
-                         mg_websocket_connect_handler connect_handler,
-                         mg_websocket_ready_handler ready_handler,
-                         mg_websocket_data_handler data_handler,
-                         mg_websocket_close_handler close_handler,
-                         void *cbdata)
+mg_set_websocket_handler_with_subprotocols(
+    struct mg_context *ctx,
+    const char *uri,
+    struct mg_websocket_subprotocols *subprotocols,
+    mg_websocket_connect_handler connect_handler,
+    mg_websocket_ready_handler ready_handler,
+    mg_websocket_data_handler data_handler,
+    mg_websocket_close_handler close_handler,
+    void *cbdata)
 {
 	int is_delete_request = (connect_handler == NULL) && (ready_handler == NULL)
 	                        && (data_handler == NULL)
@@ -10417,7 +10424,7 @@ mg_set_websocket_handler_with_subprotocols(struct mg_context *ctx,
 	                    WEBSOCKET_HANDLER,
 	                    is_delete_request,
 	                    NULL,
-						subprotocols,
+	                    subprotocols,
 	                    connect_handler,
 	                    ready_handler,
 	                    data_handler,
@@ -10438,7 +10445,7 @@ mg_set_auth_handler(struct mg_context *ctx,
 	                    AUTH_HANDLER,
 	                    handler == NULL,
 	                    NULL,
-						NULL,
+	                    NULL,
 	                    NULL,
 	                    NULL,
 	                    NULL,
@@ -10452,7 +10459,7 @@ static int
 get_request_handler(struct mg_connection *conn,
                     int handler_type,
                     mg_request_handler *handler,
-					struct mg_websocket_subprotocols **subprotocols,
+                    struct mg_websocket_subprotocols **subprotocols,
                     mg_websocket_connect_handler *connect_handler,
                     mg_websocket_ready_handler *ready_handler,
                     mg_websocket_data_handler *data_handler,
@@ -10719,7 +10726,7 @@ handle_request(struct mg_connection *conn)
 		                        is_websocket_request ? WEBSOCKET_HANDLER
 		                                             : REQUEST_HANDLER,
 		                        &callback_handler,
-								&subprotocols,
+		                        &subprotocols,
 		                        &ws_connect_handler,
 		                        &ws_ready_handler,
 		                        &ws_data_handler,
@@ -10755,7 +10762,7 @@ handle_request(struct mg_connection *conn)
 		                        AUTH_HANDLER,
 		                        NULL,
 		                        NULL,
-								NULL,
+		                        NULL,
 		                        NULL,
 		                        NULL,
 		                        NULL,
@@ -10845,7 +10852,7 @@ handle_request(struct mg_connection *conn)
 				handle_websocket_request(conn,
 				                         path,
 				                         is_callback_resource,
-										 subprotocols,
+				                         subprotocols,
 				                         ws_connect_handler,
 				                         ws_ready_handler,
 				                         ws_data_handler,
@@ -10864,7 +10871,7 @@ handle_request(struct mg_connection *conn)
 				handle_websocket_request(conn,
 				                         path,
 				                         0 /* Lua Script */,
-										 NULL,
+				                         NULL,
 				                         NULL,
 				                         NULL,
 				                         NULL,
@@ -10876,7 +10883,7 @@ handle_request(struct mg_connection *conn)
 				    conn,
 				    path,
 				    !is_script_resource /* could be deprecated global callback */,
-					NULL,
+				    NULL,
 				    deprecated_websocket_connect_wrapper,
 				    deprecated_websocket_ready_wrapper,
 				    deprecated_websocket_data_wrapper,
