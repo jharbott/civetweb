@@ -4408,7 +4408,7 @@ push(struct mg_context *ctx,
 			}
 		} else
 #endif
-		    if (fp != NULL) {
+	    if (fp != NULL) {
 			n = (int)fwrite(buf, 1, (size_t)len, fp);
 			if (ferror(fp)) {
 				n = -1;
@@ -4451,8 +4451,7 @@ push(struct mg_context *ctx,
 			return -1;
 		}
 
-		/* This code is not reached in the moment.
-		 * ==> Fix the TODOs above first. */
+		/* Only in case n=0 (timeout), repeat calling the write function */
 
 		if (timeout > 0) {
 			clock_gettime(CLOCK_MONOTONIC, &now);
@@ -9965,7 +9964,7 @@ handle_websocket_request(struct mg_connection *conn,
 
 	/* Step 4: Check if there is a responsible websocket handler. */
 	if (!is_callback_resource && !lua_websock) {
-		/* There is no callback, an Lua is not responsible either. */
+		/* There is no callback, and Lua is not responsible either. */
 		/* Reply with a 404 Not Found or with nothing at all?
 		 * TODO (mid): check the websocket standards, how to reply to
 		 * requests to invalid websocket addresses. */
