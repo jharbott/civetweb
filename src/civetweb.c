@@ -4408,7 +4408,7 @@ push(struct mg_context *ctx,
 			}
 		} else
 #endif
-	    if (fp != NULL) {
+		    if (fp != NULL) {
 			n = (int)fwrite(buf, 1, (size_t)len, fp);
 			if (ferror(fp)) {
 				n = -1;
@@ -12434,6 +12434,12 @@ reset_per_request_attributes(struct mg_connection *conn)
 }
 
 
+#if 0
+/* Note: set_sock_timeout is not required for non-blocking sockets.
+ * Leave this function here (commented out) for reference until 
+ * CivetWeb 1.9 is tested, and the tests confirme this function is
+ * no longer required.
+*/
 static int
 set_sock_timeout(SOCKET sock, int milliseconds)
 {
@@ -12474,6 +12480,7 @@ set_sock_timeout(SOCKET sock, int milliseconds)
 
 	return r0 || r1 || r2;
 }
+#endif
 
 
 static int
@@ -12790,6 +12797,10 @@ mg_connect_client_impl(const struct mg_client_options *client_options,
 			}
 		}
 #endif
+	}
+
+	if (conn) {
+		set_blocking_mode(sock, 0);
 	}
 
 	return conn;
@@ -13182,7 +13193,9 @@ mg_get_response(struct mg_connection *conn,
 		if (timeout >= 0) {
 			mg_snprintf(conn, NULL, txt, sizeof(txt), "%i", timeout);
 			rctx.config[REQUEST_TIMEOUT] = txt;
+			/* Not required for non-blocking sockets.
 			set_sock_timeout(conn->client.sock, timeout);
+			*/
 		} else {
 			rctx.config[REQUEST_TIMEOUT] = NULL;
 		}
@@ -13405,6 +13418,7 @@ mg_connect_websocket_client(const char *host,
 		DEBUG_TRACE("%s",
 		            "Websocket client connect thread could not be started\r\n");
 	}
+
 #else
 	/* Appease "unused parameter" warnings */
 	(void)host;
