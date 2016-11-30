@@ -1960,6 +1960,9 @@ mg_get_valid_options(void)
 }
 
 
+/* Do not open file (used in is_file_in_memory) */
+#define MG_FOPEN_MODE_NONE (0)
+
 /* Open file for read only access */
 #define MG_FOPEN_MODE_READ (1)
 
@@ -1981,6 +1984,10 @@ open_file_in_memory(const struct mg_connection *conn,
 	size_t size = 0;
 	const char *buf = NULL;
 	if (!conn) {
+		return 0;
+	}
+
+	if ((mode != MG_FOPEN_MODE_NONE) && (mode != MG_FOPEN_MODE_READ)) {
 		return 0;
 	}
 
@@ -2018,7 +2025,7 @@ open_file_in_memory(const struct mg_connection *conn,
 static int
 is_file_in_memory(const struct mg_connection *conn, const char *path)
 {
-	return open_file_in_memory(conn, path, NULL, 0);
+	return open_file_in_memory(conn, path, NULL, MG_FOPEN_MODE_NONE);
 }
 
 
