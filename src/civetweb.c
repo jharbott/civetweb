@@ -6072,7 +6072,7 @@ open_auth_file(struct mg_connection *conn,
 
 			if (truncated || !mg_fopen(conn, name, MG_FOPEN_MODE_READ, filep)) {
 #ifdef DEBUG
-				mg_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
+				DEBUG_TRACE("fopen(%s): %s", name, strerror(ERRNO));
 #endif
 			}
 		} else {
