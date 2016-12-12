@@ -12414,6 +12414,7 @@ close_socket_gracefully(struct mg_connection *conn)
 	} while (n > 0);
 #endif
 
+#if !defined(__MACH__)
 	/* Set linger option to avoid socket hanging out after close. This
 	 * prevent ephemeral port exhaust problem under high QPS. */
 	linger.l_onoff = 1;
@@ -12434,8 +12435,7 @@ close_socket_gracefully(struct mg_connection *conn)
 	} else if (error_code == ECONNRESET) {
 		/* Socket already closed by client/peer, close socket without linger */
 	} else {
-
-
+    
 		/* Set linger timeout */
 		if (setsockopt(conn->client.sock,
 		               SOL_SOCKET,
@@ -12448,6 +12448,7 @@ close_socket_gracefully(struct mg_connection *conn)
 			       strerror(ERRNO));
 		}
 	}
+#endif
 
 	/* Now we know that our FIN is ACK-ed, safe to close */
 	closesocket(conn->client.sock);
