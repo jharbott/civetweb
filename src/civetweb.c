@@ -6839,7 +6839,7 @@ mg_modify_passwords_file(const char *fname,
 static int
 is_valid_port(unsigned long port)
 {
-	return port < 0xffff;
+	return (port <= 0xffff);
 }
 
 
@@ -6909,7 +6909,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		return 0;
 	}
 
-	if (port < 0 || !is_valid_port((unsigned)port)) {
+	if (port <= 0 || !is_valid_port((unsigned)port)) {
 		mg_snprintf(NULL,
 		            NULL, /* No truncation check for ebuf */
 		            ebuf,
@@ -13130,7 +13130,7 @@ get_uri_type(const char *uri)
 			}
 
 			port = strtoul(portbegin + 1, &portend, 10);
-			if ((portend != hostend) || !port || !is_valid_port(port)) {
+			if ((portend != hostend) || (port <= 0) || !is_valid_port(port)) {
 				return 0;
 			}
 
@@ -13185,7 +13185,8 @@ get_rel_url_at_current_server(const char *uri, const struct mg_connection *conn)
 				request_domain_len = (size_t)(hostend - hostbegin);
 			} else {
 				port = strtoul(portbegin + 1, &portend, 10);
-				if ((portend != hostend) || !port || !is_valid_port(port)) {
+				if ((portend != hostend) || (port <= 0)
+				    || !is_valid_port(port)) {
 					return 0;
 				}
 				request_domain_len = (size_t)(portbegin - hostbegin);
