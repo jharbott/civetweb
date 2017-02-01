@@ -2258,6 +2258,8 @@ open_file_in_memory(const struct mg_connection *conn,
                     struct mg_file *filep,
                     int mode)
 {
+#if defined(MG_USE_OPEN_FILE)
+
 	size_t size = 0;
 	const char *buf = NULL;
 	if (!conn) {
@@ -2268,7 +2270,6 @@ open_file_in_memory(const struct mg_connection *conn,
 		return 0;
 	}
 
-#if defined(MG_USE_OPEN_FILE)
 	if (conn->ctx->callbacks.open_file) {
 		buf = conn->ctx->callbacks.open_file(conn, path, &size);
 		if (buf != NULL) {
@@ -2295,9 +2296,18 @@ open_file_in_memory(const struct mg_connection *conn,
 			filep->stat.is_gzipped = 0;
 		}
 	}
-#endif
 
 	return (buf != NULL);
+
+#else
+    (void)conn;
+    (void)path;
+    (void)filep;
+    (void)mode;
+
+    return 0;
+
+#endif
 }
 
 
