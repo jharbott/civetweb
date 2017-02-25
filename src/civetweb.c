@@ -8084,6 +8084,7 @@ mg_store_body(struct mg_connection *conn, const char *path)
 			remove_bad_file(conn, path);
 			return -13;
 		}
+		len += ret;
 		ret = mg_read(conn, buf, sizeof(buf));
 	}
 
