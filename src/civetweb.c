@@ -14638,6 +14638,7 @@ get_system_name(char **sysName)
 	DWORD dwMajorVersion = 0;
 	DWORD dwMinorVersion = 0;
 	DWORD dwBuild = 0;
+	BOOL wowRet, isWoW = FALSE;
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -14654,10 +14655,14 @@ get_system_name(char **sysName)
 	dwBuild = ((dwVersion < 0x80000000) ? (DWORD)(HIWORD(dwVersion)) : 0);
 	(void)dwBuild;
 
+	wowRet = IsWow64Process(GetCurrentProcess(), &isWoW);
+
 	sprintf(name,
-	        "Windows %u.%u",
+	        "Windows %u.%u%s",
 	        (unsigned)dwMajorVersion,
-	        (unsigned)dwMinorVersion);
+	        (unsigned)dwMinorVersion,
+	        (wowRet ? (isWoW ? " (WoW64)" : "") : " (?)"));
+
 	*sysName = mg_strdup(name);
 #endif
 #else
