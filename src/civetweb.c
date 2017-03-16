@@ -15655,11 +15655,14 @@ static int mg_ssl_initialized = 0;
 unsigned
 mg_init_library(unsigned features)
 {
+#if !defined(NO_SSL)
 	char ebuf[128];
+#endif
 
 	unsigned features_to_init = mg_check_feature(features & 0xFFu);
 	unsigned features_inited = features_to_init;
 
+#if !defined(NO_SSL)
 	if (features_to_init & 2) {
 		if (!mg_ssl_initialized) {
 			if (initialize_ssl(ebuf, sizeof(ebuf))) {
@@ -15667,12 +15670,13 @@ mg_init_library(unsigned features)
 			} else {
 				(void)ebuf;
 				/* TODO: print error */
-				features_inited &= ~2;
+				features_inited &= ~(2u);
 			}
 		} else {
 			/* ssl already initialized */
 		}
 	}
+#endif
 
 	/* Start Windows. */
 	if (mg_init_library_called <= 0) {
@@ -15701,10 +15705,12 @@ mg_exit_library(void)
 #if defined(_WIN32) && !defined(__SYMBIAN32__)
 		(void)WSACleanup();
 #endif /* _WIN32 && !__SYMBIAN32__ */
+#if !defined(NO_SSL)
 		if (mg_ssl_initialized) {
 			uninitialize_ssl();
 			mg_ssl_initialized = 0;
 		}
+#endif
 	}
 	return 1;
 }
