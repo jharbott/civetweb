@@ -12299,7 +12299,7 @@ refresh_trust(struct mg_connection *conn)
 	if (chain == NULL) {
 		chain = pem;
 	}
-	if (*chain == 0) {
+	if ((chain != NULL) && (*chain == 0)) {
 		chain = NULL;
 	}
 
