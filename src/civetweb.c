@@ -15944,6 +15944,9 @@ mg_get_context_info_impl(const struct mg_context *ctx, char *buffer, int buflen)
 #endif
 	struct mg_memory_stat *ms = get_memory_stat((struct mg_context *)ctx);
 
+	const char *eoobj = "}";
+	int reserved_len = (int)strlen(eoobj) + (int)strlen(eol);
+
 	if ((buffer == NULL) || (buflen < 10)) {
 		buflen = 0;
 	}
@@ -15961,10 +15964,10 @@ mg_get_context_info_impl(const struct mg_context *ctx, char *buffer, int buflen)
 		            block,
 		            sizeof(block),
 		            "\"memory\" : {%s"
-		            "\"blocks\" : %i%s"
-		            "\"used\" : %" INT64_FMT "%s"
+		            "\"blocks\" : %i,%s"
+		            "\"used\" : %" INT64_FMT ",%s"
 		            "\"maxUsed\" : %" INT64_FMT "%s"
-		            "},%s",
+		            "}%s%s",
 		            eol,
 		            ms->blockCount,
 		            eol,
@@ -15972,10 +15975,11 @@ mg_get_context_info_impl(const struct mg_context *ctx, char *buffer, int buflen)
 		            eol,
 		            ms->maxMemUsed,
 		            eol,
+		            (ctx ? "," : ""),
 		            eol);
 
 		context_info_length += (int)strlen(block);
-		if (context_info_length < buflen) {
+		if (context_info_length + reserved_len < buflen) {
 			strcat(buffer, block);
 		}
 	}
@@ -15988,8 +15992,8 @@ mg_get_context_info_impl(const struct mg_context *ctx, char *buffer, int buflen)
 		            block,
 		            sizeof(block),
 		            "\"connections\" : {%s"
-		            "\"active\" : %i%s"
-		            "\"maxActive\" : %i%s"
+		            "\"active\" : %i,%s"
+		            "\"maxActive\" : %i,%s"
 		            "\"total\" : %" INT64_FMT "%s"
 		            "},%s",
 		            eol,
@@ -16002,7 +16006,7 @@ mg_get_context_info_impl(const struct mg_context *ctx, char *buffer, int buflen)
 		            eol);
 
 		context_info_length += (int)strlen(block);
-		if (context_info_length < buflen) {
+		if (context_info_length + reserved_len < buflen) {
 			strcat(buffer, block);
 		}
 	}
@@ -16015,22 +16019,23 @@ mg_get_context_info_impl(const struct mg_context *ctx, char *buffer, int buflen)
 		            sizeof(block),
 		            "\"requests\" : {%s"
 		            "\"total\" : %" INT64_FMT "%s"
-		            "},%s",
+		            "}%s",
 		            eol,
 		            ctx->total_requests,
 		            eol,
 		            eol);
 
 		context_info_length += (int)strlen(block);
-		if (context_info_length < buflen) {
+		if (context_info_length + reserved_len < buflen) {
 			strcat(buffer, block);
 		}
 	}
 
 	if ((buflen > 0) && buffer && buffer[0]) {
-		char *p = strrchr(buffer, ',');
-		if (p) {
-			*p = '}';
+		if (context_info_length < buflen) {
+			strcat(buffer, eoobj);
+			strcat(buffer, eol);
+			context_info_length += reserved_len;
 		}
 	}
 
