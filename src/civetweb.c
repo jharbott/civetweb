@@ -1895,6 +1895,9 @@ enum {
 #endif
 	VALIDATE_HTTP_METHOD,
 	CANONICALIZE_URL_PATH,
+#if !defined(NO_SSL)
+	STRICT_HTTPS_MAX_AGE,
+#endif
 #if defined(__linux__)
 	ALLOW_SENDFILE_CALL,
 #endif
@@ -1987,6 +1990,9 @@ static struct mg_option config_options[] = {
 #endif
     {"validate_http_method", CONFIG_TYPE_BOOLEAN, "yes"},
     {"canonicalize_url_path", CONFIG_TYPE_BOOLEAN, "yes"},
+#if !defined(NO_SSL)
+    {"strict_transport_security_max_age", CONFIG_TYPE_NUMBER, NULL},
+#endif
 #if defined(__linux__)
     {"allow_sendfile_call", CONFIG_TYPE_BOOLEAN, "yes"},
 #endif
@@ -3440,13 +3446,16 @@ static int
 send_additional_header(struct mg_connection *conn)
 {
 	int i = 0;
-	(void)conn;
 
-#if 0
-	/* TODO (Feature): Configure additional response header */
-	i += mg_printf(conn, "Strict-Transport-Security: max-age=%u\r\n", 3600);
-	i += mg_printf(conn, "X-Some-Test-Header: %u\r\n", 42);
-#endif
+	if (conn->ctx->config[STRICT_HTTPS_MAX_AGE]) {
+		int max_age = atoi(conn->ctx->config[STRICT_HTTPS_MAX_AGE]);
+		if (max_age >= 0) {
+			i += mg_printf(conn,
+			               "Strict-Transport-Security: max-age=%u\r\n",
+			               (unsigned)max_age);
+		}
+	}
+
 	return i;
 }
 
