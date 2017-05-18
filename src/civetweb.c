@@ -3447,6 +3447,7 @@ send_additional_header(struct mg_connection *conn)
 {
 	int i = 0;
 
+#if !defined(NO_SSL)
 	if (conn->ctx->config[STRICT_HTTPS_MAX_AGE]) {
 		int max_age = atoi(conn->ctx->config[STRICT_HTTPS_MAX_AGE]);
 		if (max_age >= 0) {
@@ -3455,6 +3456,9 @@ send_additional_header(struct mg_connection *conn)
 			               (unsigned)max_age);
 		}
 	}
+#else
+	(void)conn; /* unused */
+#endif
 
 	return i;
 }
